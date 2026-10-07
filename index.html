@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agentic Vision — A neckband that sees, reasons, plans &amp; speaks</title>
+  <meta name="description" content="Agentic Vision: a 360° wearable neckband + on-phone Agentic Perception Pipeline (YOLOv10, MiDaS, Kalman, Phi-3) that gives visually impaired people step-by-step spoken navigation." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <!-- ============ LOADER ============ -->
+  <div id="loader">
+    <div class="loader-inner">
+      <div class="loader-ring"><span></span></div>
+      <div class="loader-brand">AGENTIC<b>VISION</b></div>
+      <div class="loader-bar"><i id="loader-fill"></i></div>
+      <div class="loader-pct" id="loader-pct">0%</div>
+    </div>
+  </div>
+
+  <!-- ============ 3D LAYER ============ -->
+  <canvas id="webgl"></canvas>
+  <div id="vignette"></div>
+  <svg id="callout-lines"></svg>
+  <div id="callouts"></div>
+
+  <!-- ============ CHROME ============ -->
+  <header class="topbar">
+    <a class="brand" href="#intro"><span class="brand-dot"></span>AGENTIC<b>VISION</b></a>
+    <div class="topbar-right">
+      <span class="chip-live"><i></i>Edge-AI · Offline</span>
+    </div>
+    <div class="progress"><i id="progress-fill"></i></div>
+  </header>
+  <nav id="chapters" aria-label="Chapters"></nav>
+
+  <!-- ============ INTRO ============ -->
+  <section id="intro">
+    <div class="intro-grid-bg"></div>
+    <div class="intro-content">
+      <div class="eyebrow"><span class="pulse"></span>Agentic Perception Pipeline · Wearable Edge-AI</div>
+      <h1 class="hero-title">
+        <span class="line">See.</span>
+        <span class="line">Reason.</span>
+        <span class="line">Plan.</span>
+        <span class="line grad">Speak.</span>
+      </h1>
+      <p class="hero-sub">
+        <b>Agentic Vision</b> is a 360° camera neckband paired with an on-phone AI agent that turns
+        a chaotic street into calm, step-by-step spoken guidance for people who are blind or visually impaired.
+      </p>
+      <div class="stats">
+        <div class="stat"><b data-count="80">0</b><span>M+</span><small>visually impaired people in India</small></div>
+        <div class="stat"><b>360°</b><small>awareness from 4 wide-angle cameras</small></div>
+        <div class="stat"><b>2–3 s</b><small>collision foresight with Kalman tracking</small></div>
+        <div class="stat"><b>0</b><span>&nbsp;cloud</span><small>everything runs on the phone</small></div>
+      </div>
+    </div>
+    <div class="intro-problem">
+      <div class="problem-card">
+        <div class="problem-label">Today's assistive apps say</div>
+        <div class="problem-words"><span>“Person.”</span><span>“Chair.”</span><span>“Car.”</span></div>
+        <div class="problem-q">But never answer the only question that matters:</div>
+        <div class="problem-big">“How do I safely get from <em>here</em> to <em>there</em>?”</div>
+      </div>
+    </div>
+    <div class="scroll-cue"><span>Scroll to meet the device</span><i></i></div>
+  </section>
+
+  <!-- ============ STORY (scroll track, height set in JS) ============ -->
+  <div id="story"></div>
+
+  <!-- ============ FIXED STORY PANELS ============ -->
+  <div id="panels">
+    <!-- 1 reveal -->
+    <article class="panel left" id="p-reveal">
+      <div class="kicker">01 · The Device</div>
+      <h2>A collar that <span class="grad">sees everything.</span></h2>
+      <p>Four wide-angle cameras, four depth sensors and open-ear audio — worn like a light neckband.
+        The phone stays in your pocket and does all the thinking.</p>
+      <div class="chips">
+        <span>4× Sony IMX708 Wide</span><span>4× VL53L5CX ToF</span><span>ESP32-S3 hub</span><span>Open-ear audio</span>
+      </div>
+    </article>
+
+    <!-- 2 rotate -->
+    <article class="panel left" id="p-rotate">
+      <div class="kicker">02 · Industrial Design</div>
+      <h2>Every angle, <span class="grad">covered.</span></h2>
+      <div class="deg-counter"><b id="deg">000</b><span>°</span></div>
+      <p>Camera pods sit at the four diagonals of the neck — so the body itself never blocks the view.</p>
+      <ul class="headings">
+        <li><i style="--c:#34d399"></i>FL <b>315°</b></li>
+        <li><i style="--c:#22d3ee"></i>FR <b>45°</b></li>
+        <li><i style="--c:#a78bfa"></i>RR <b>135°</b></li>
+        <li><i style="--c:#f472b6"></i>RL <b>225°</b></li>
+      </ul>
+    </article>
+
+    <!-- 3 camera + tof -->
+    <article class="panel right wide" id="p-cam">
+      <div class="kicker">03 · Vision Pod</div>
+      <h2>Eyes + depth, <span class="grad">stacked.</span></h2>
+      <div class="spec">
+        <div class="spec-head"><span class="spec-tag cyan">CAMERA</span>Raspberry Pi Camera Module 3 Wide</div>
+        <div class="spec-grid">
+          <div><small>Sensor</small><b>Sony IMX708 · 12 MP</b></div>
+          <div><small>Field of view</small><b>120° D · 102° H</b></div>
+          <div><small>Focus</small><b>PDAF autofocus</b></div>
+          <div><small>Board</small><b>25 × 24 mm · HDR</b></div>
+        </div>
+        <p>Feeds every frame into <b>YOLOv10</b> detection and <b>MiDaS</b> depth on the phone.</p>
+      </div>
+      <div class="spec">
+        <div class="spec-head"><span class="spec-tag red">ToF</span>ST VL53L5CX multizone Time-of-Flight</div>
+        <div class="spec-grid">
+          <div><small>Zones</small><b>8 × 8 = 64</b></div>
+          <div><small>Range</small><b>up to 4 m</b></div>
+          <div><small>Emitter</small><b>940 nm VCSEL</b></div>
+          <div><small>Field of view</small><b>63° diagonal</b></div>
+        </div>
+        <p>Measures <b>true metric distance</b> — it anchors MiDaS's relative depth to real metres, even in low light.</p>
+      </div>
+    </article>
+
+    <!-- 4 top view -->
+    <article class="panel left" id="p-top">
+      <div class="kicker">04 · Field of View</div>
+      <h2>360°. <span class="grad">No blind spots.</span></h2>
+      <p>Four 120° cameras at 45°, 135°, 225° and 315° give <b>480° of coverage for a 360° world</b>.
+        Every seam is seen by two cameras, so objects are tracked continuously as they move around you.</p>
+      <div class="cover-bar">
+        <div class="cb" style="--c:#22d3ee;--w:25%">FR</div><div class="cb" style="--c:#a78bfa;--w:25%">RR</div><div class="cb" style="--c:#f472b6;--w:25%">RL</div><div class="cb" style="--c:#34d399;--w:25%">FL</div>
+      </div>
+      <p class="muted">The scooter overtaking from behind is seen as clearly as the pole in front — something a phone held in your hand can never do.</p>
+    </article>
+
+    <!-- 5 rear hub -->
+    <article class="panel left" id="p-rear">
+      <div class="kicker">05 · Rear Hub</div>
+      <h2>The <span class="grad">brain stem.</span></h2>
+      <ul class="comp-list">
+        <li><b>ESP32-S3</b><span>Sensor hub — syncs cameras, ToF &amp; IMU, streams to the phone over Wi-Fi and plays back audio.</span></li>
+        <li><b>6-axis IMU</b><span>Knows which way your body faces, so “left” always means <i>your</i> left. Detects falls.</span></li>
+        <li><b>USB-C + charger</b><span>Single-port charging with Li-ion protection &amp; power-path.</span></li>
+        <li><b>2 battery lobes</b><span>Li-Po cells either side of the neck for balance and comfort all day.</span></li>
+      </ul>
+    </article>
+
+    <!-- 6 uplink -->
+    <article class="panel bottom" id="p-up">
+      <div class="kicker">06 · Uplink</div>
+      <h2>Neckband <span class="arrow">→</span> <span class="grad">Phone</span></h2>
+      <p>Four synchronised camera streams, four 64-zone ToF depth grids and IMU orientation flow to the Android app.
+        The phone is the edge-AI computer — <b>no cloud, no network, no privacy leaks.</b></p>
+    </article>
+
+    <!-- 7 pipeline -->
+    <article class="panel right pipe" id="p-pipe">
+      <div class="kicker">07 · On-Phone Agentic Pipeline</div>
+      <h2>From pixels to a <span class="grad">plan.</span></h2>
+      <ol class="stages" id="stages">
+        <li><b>Continuous input</b><span>4 cameras + ToF + IMU, frame-synced</span><i></i></li>
+        <li><b>Object detection · YOLOv10</b><span>NMS-free detector → classes + boxes</span><i></i></li>
+        <li><b>Depth · MiDaS + ToF</b><span>Relative depth scaled to metres</span><i></i></li>
+        <li><b>Scene fusion</b><span>{object, distance, direction, velocity}</span><i></i></li>
+        <li><b>Trajectory · Kalman filter</b><span>Future positions 2–3 s ahead, time-to-collision</span><i></i></li>
+        <li><b>Agentic reasoning · Phi-3 Mini</b><span>Your goal + the scene → a decision</span><i></i></li>
+        <li><b>Speech output</b><span>On-device TTS → neckband earbuds</span><i></i></li>
+      </ol>
+      <div class="runtime">TensorRT · ONNX Runtime · INT4/INT8 quantised</div>
+    </article>
+
+    <!-- 8 downlink -->
+    <article class="panel bottom-compact" id="p-down">
+      <div class="kicker">08 · Downlink</div>
+      <h2>Phone <span class="arrow">→</span> <span class="grad warm">Neckband</span></h2>
+      <blockquote>“Stop. Motorbike approaching from your right. Now step slightly left and continue straight.”</blockquote>
+      <p class="muted">The decision returns as a compact synthesised voice packet and is played straight into the earbuds.</p>
+    </article>
+
+    <!-- 9 earbuds -->
+    <article class="panel right" id="p-ear">
+      <div class="kicker">09 · Open-Ear Audio</div>
+      <h2>Open ears. <span class="grad">Open world.</span></h2>
+      <ul class="comp-list">
+        <li><b>No ear-canal seal</b><span>Traffic, voices and footsteps stay audible — the most important sense a blind traveller has is never blocked.</span></li>
+        <li><b>EarPods-style bud</b><span>Rests in the outer ear; a mesh-covered nozzle aims the voice at the ear opening.</span></li>
+        <li><b>Wired from the band</b><span>Cable leaves a strain-relief on the side of the band — no pairing, no extra batteries, no Bluetooth lag.</span></li>
+        <li><b>Inline mic</b><span>Speak your goal: “Take me to the bus stop.”</span></li>
+      </ul>
+    </article>
+
+    <!-- 10 outro -->
+    <article class="panel center" id="p-outro">
+      <div class="kicker">The Loop</div>
+      <h2 class="huge">Sees. Reasons.<br/>Plans. <span class="grad">Speaks.</span></h2>
+      <p>Continuously — dozens of times every second.</p>
+    </article>
+  </div>
+
+  <!-- ============ INNOVATION ============ -->
+  <section id="innovation">
+    <div class="wrap">
+      <div class="kicker center">10 · Why this has never existed</div>
+      <h2 class="section-title">Navigation is a <span class="grad">reasoning</span> problem,<br/>not a detection problem.</h2>
+      <p class="section-sub">Every commercial assistive app stops at “there is a person”. Agentic Vision is the first wearable that closes the loop from perception to a spoken, goal-directed plan.</p>
+
+      <div class="cards">
+        <div class="card"><div class="card-ico">🧠</div><h3>Agentic, goal-driven</h3><p>A quantised <b>Phi-3 Mini</b> takes your goal and the live 3D scene and produces step-by-step guidance — “stop”, “slight left”, “continue straight” — not labels.</p></div>
+        <div class="card"><div class="card-ico">📏</div><h3>Metric depth fusion</h3><p><b>YOLOv10 + MiDaS</b> fused into 3D bounding volumes, with <b>VL53L5CX ToF</b> anchoring relative depth to real metres: “Motorbike 1.2 m ahead, 30° right.”</p></div>
+        <div class="card"><div class="card-ico">⏱️</div><h3>Predicts the future</h3><p>A <b>Kalman filter</b> tracks every moving object and forecasts collision risk <b>2–3 seconds ahead</b> — absent in all current commercial apps.</p></div>
+        <div class="card"><div class="card-ico">🌐</div><h3>True 360° awareness</h3><p>Four 120° cameras around the neck see behind and beside you. Phone-in-hand apps see only where the phone points.</p></div>
+        <div class="card"><div class="card-ico">🙌</div><h3>Hands-free, ears-open</h3><p>No phone to hold, no cane-mounted gadget, no sealed earbuds. A white cane or guide dog stays in the hand; ambient sound stays in the ears.</p></div>
+        <div class="card"><div class="card-ico">⚡</div><h3>Edge-AI, offline</h3><p>The full pipeline is optimised with <b>TensorRT + ONNX Runtime</b> and runs on the phone — low latency, works without network, and video never leaves the device.</p></div>
+      </div>
+
+      <div class="compare">
+        <h3>How it compares</h3>
+        <div class="table">
+          <div class="tr th"><div>Capability</div><div>Typical detection apps</div><div>Smart canes / ultrasonic</div><div class="hl">Agentic Vision</div></div>
+          <div class="tr"><div>Output</div><div>Single labels</div><div>Beeps / vibration</div><div class="hl">Spoken step-by-step plan</div></div>
+          <div class="tr"><div>Distance</div><div class="no">✕</div><div>Nearest obstacle only</div><div class="hl">Per-object, metric (m)</div></div>
+          <div class="tr"><div>Direction</div><div class="no">✕</div><div class="no">✕</div><div class="hl">Angle per object (°)</div></div>
+          <div class="tr"><div>Field of view</div><div>Where the phone points</div><div>Narrow cone, ahead</div><div class="hl">360°, overlapping</div></div>
+          <div class="tr"><div>Moving objects</div><div class="no">✕</div><div class="no">✕</div><div class="hl">Kalman, 2–3 s prediction</div></div>
+          <div class="tr"><div>User goals</div><div class="no">✕</div><div class="no">✕</div><div class="hl">LLM reasoning (Phi-3)</div></div>
+          <div class="tr"><div>Hands-free</div><div class="no">✕</div><div class="no">✕ (in hand)</div><div class="hl">✓ neckband</div></div>
+          <div class="tr"><div>Runs offline</div><div>Often cloud</div><div>✓</div><div class="hl">✓ on-device</div></div>
+        </div>
+      </div>
+
+      <div class="arch">
+        <h3>The Agentic Perception Pipeline</h3>
+        <div class="flow">
+          <div class="node">Input<small>4 cams · ToF · IMU</small></div><span class="link"></span>
+          <div class="node">YOLOv10<small>detect</small></div><span class="link"></span>
+          <div class="node">MiDaS + ToF<small>metric depth</small></div><span class="link"></span>
+          <div class="node">Scene fusion<small>3D scene graph</small></div><span class="link"></span>
+          <div class="node">Kalman<small>trajectory · TTC</small></div><span class="link"></span>
+          <div class="node hl">Phi-3 Mini<small>reason · plan</small></div><span class="link"></span>
+          <div class="node">TTS<small>voice → earbuds</small></div>
+        </div>
+      </div>
+
+      <div class="closing">
+        <h2>Not a detector. <span class="grad">A guide.</span></h2>
+        <p>Built for the 80 million+ people in India who deserve to move through the world with confidence.</p>
+        <a class="btn" href="#intro">↑ Experience it again</a>
+      </div>
+    </div>
+    <footer>Agentic Vision · Agentic Perception Pipeline · Neckband prototype</footer>
+  </section>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
